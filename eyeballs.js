@@ -28,18 +28,13 @@ function loadPupils(){
     }
 }
 
-function drawBackground(horizon) {
+function drawBackground(heightStart, heightEnd, colorStart, colorEnd) {
     noFill();
-    var y = horizon; 
-    var w = CANVAS_WIDTH;
-    var h = CANVAS_HEIGHT;
-    var c1 = color(255);
-    var c2 = color(253, 63, 102);
-    for (var i = y; i <= h; i++) {
-        var inter = map(i, y, h, 0, 2);
-        var c = lerpColor(c1, c2, inter);
+    for (var i = heightStart; i <= heightEnd; i++) {
+        var inter = map(i, heightStart, heightEnd, 0, 2);
+        var c = lerpColor(colorStart, colorEnd, inter);
         stroke(c);
-        line(0, i, w, i);
+        line(0, i, CANVAS_WIDTH, i);
     }
 }
 
@@ -56,20 +51,28 @@ function drawEyeballs(horizon) {
     var scaleFactor = 1.6;
     var height = horizon
     while (height < maxHeight){
-        var heightAlpha = map(height, horizon, maxHeight, 10, 200);
+
         var width = random(-20, 2);
         while (width < maxWidth){   
             var x = width + random(-widthOffset, widthOffset);
-            var y = height + random(-heightOffset, heightOffset); 
+            var y = height + random(-heightOffset); 
             drawEyeball(x, y, scaleValue);
             width += widthInterval;
         }
+
+        var oldHeight = height;
         height += heightInterval;
         heightInterval *= heightFactor;
         heightOffset *= heightFactor;
         widthInterval *= widthFactor;
         widthOffset *= widthFactor;
         scaleValue *= scaleFactor;
+
+        if (height < maxHeight) {
+            var oldColor = color(255, 255, 255, 255);
+            var newColor = color(255, 255, 255, 0);
+            drawBackground(horizon - 30, height + 100, oldColor, newColor);
+        }
     }
 }
 
@@ -92,7 +95,7 @@ function drawEyeball(x, y, scaleValue){
 function preload(){
     
     loadEyeballs();
-    loadPupils();
+    loadPupils();   
 
 }
 
@@ -101,7 +104,9 @@ function setup(){
 
     createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     var horizon = CANVAS_HEIGHT / 3;
-    drawBackground(horizon);
+    background(color(253, 110, 139));
+    //background(color(253, 63, 102));
+    drawBackground(0, horizon - 30, color(255), color(255));
     drawEyeballs(horizon); 
     
 }

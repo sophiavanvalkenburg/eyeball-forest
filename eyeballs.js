@@ -3,6 +3,9 @@ var CANVAS_HEIGHT = window.innerHeight;
 var CANVAS_WIDTH = window.innerWidth;
 var NUM_EYEBALLS = 5;
 var NUM_PUPILS = 4;
+var GROUND_COLOR = [253, 110, 139];
+var FOG_START_COLOR = [255, 255, 255, 200];
+var FOG_END_COLOR = [255, 255, 255, 0];
 
 var eyeballs = [];
 var eyeballPool = eyeballs;
@@ -38,7 +41,7 @@ function drawBackground(heightStart, heightEnd, colorStart, colorEnd) {
     }
 }
 
-function drawEyeballs(horizon) {
+function drawEyeballs(horizon, fogStart) {
     var maxHeight = CANVAS_HEIGHT;
     var maxWidth = CANVAS_WIDTH;
     var heightInterval = 20;
@@ -47,13 +50,14 @@ function drawEyeballs(horizon) {
     var widthFactor = 1.6;
     var heightOffset = 5
     var widthOffset = 5;
-    var scaleValue = 0.025;
+    var scaleValue = 0.025
     var scaleFactor = 1.6;
-    var height = horizon
+    var height = horizon;
+    var loopCount = 0;
     while (height < maxHeight){
 
         var width = random(-20, 2);
-        while (width < maxWidth){   
+        while (loopCount != 0 && width < maxWidth){   
             var x = width + random(-widthOffset, widthOffset);
             var y = height + random(-heightOffset); 
             drawEyeball(x, y, scaleValue);
@@ -68,11 +72,11 @@ function drawEyeballs(horizon) {
         widthOffset *= widthFactor;
         scaleValue *= scaleFactor;
 
+        // don't fog the ones in the front
         if (height < maxHeight) {
-            var oldColor = color(255, 255, 255, 255);
-            var newColor = color(255, 255, 255, 0);
-            drawBackground(horizon - 30, height + 100, oldColor, newColor);
+            drawBackground(fogStart, height, color(FOG_START_COLOR), color(FOG_END_COLOR));
         }
+        loopCount++;
     }
 }
 
@@ -103,10 +107,19 @@ function preload(){
 function setup(){
 
     createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
+
     var horizon = CANVAS_HEIGHT / 3;
-    background(color(253, 110, 139));
-    //background(color(253, 63, 102));
-    drawBackground(0, horizon - 30, color(255), color(255));
-    drawEyeballs(horizon); 
+    var fogStart = horizon - 40;
+
+    background(color(GROUND_COLOR));
+
+    noStroke();
+    var topColor = color(FOG_START_COLOR);
+    topColor.setAlpha(255);
+    fill(topColor);
+    rect(0, 0, CANVAS_WIDTH, fogStart + 1);
+    noFill();
+    
+    drawEyeballs(horizon, fogStart);     
     
 }

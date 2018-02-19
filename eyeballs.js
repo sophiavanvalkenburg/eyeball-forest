@@ -3,7 +3,7 @@ var CANVAS_HEIGHT = window.innerHeight;
 var CANVAS_WIDTH = window.innerWidth;
 var NUM_EYEBALLS = 5;
 var NUM_PUPILS = 4;
-var GROUND_COLOR = [253, 110, 139];
+var GROUND_COLOR = [253, 125, 152];
 var FOG_START_COLOR = [255, 255, 255, 200];
 var FOG_END_COLOR = [255, 255, 255, 0];
 
@@ -18,6 +18,7 @@ function loadEyeballs(){
         var eyeballImg = loadImage(IMGPATH + 'eye' + n + '.png');
         var eyeballMask = loadImage(IMGPATH + 'eye' + n + 'mask.png');
         eyeballs.push({
+            'id': i,
             'img': eyeballImg,
             'mask': eyeballMask
         });
@@ -84,16 +85,47 @@ function getRandomEyeball(){
     // ensure we choose a different eyeball each time
     var eyeball = random(eyeballPool);
     eyeballPool = eyeballs.slice();
-    eyeballPool.splice(eyeballPool.indexOf(eyeball), 1);
+    eyeballPool.splice(eyeball.id, 1);
     return eyeball;
+}
+
+function getPupilYOffset(height, eId){
+    switch(eId){
+        case 0: return height / 20;
+        case 1: return height / 18;
+        case 2: return height / 30;
+        case 3: return height / 15;
+        case 4: return 0;
+    }
+}
+
+function getPupilXOffset(width, eId){
+    switch(eId){
+        case 2: return 3 * width / 8;
+        default: return width / 2;
+    }
+}
+
+function getPupilScale(eId) {
+    switch(eId){
+        case 2: return 0.35;
+        default: return 0.75;
+    }
 }
 
 function drawEyeball(x, y, scaleValue){
     var eyeball = getRandomEyeball();
     var width = eyeball.img.width * scaleValue;
     var height = eyeball.img.height * scaleValue;
-    y = y - height;
-    image(eyeball.img, x, y, width, height);
+    var pupil = random(pupils);
+    image(eyeball.img, x, y - height, width, height);
+    var pupilYOffset = getPupilYOffset(height, eyeball.id);
+    var pupilXOffset = getPupilXOffset(width, eyeball.id)
+    var pupilScale = getPupilScale(eyeball.id);
+    image(pupil, x + pupilXOffset, y - height + pupilYOffset, pupilScale * pupil.width * scaleValue, pupilScale * pupil.height * scaleValue);
+    fill(0)
+    //ellipse(x, y, 15, 15);
+    noFill();
 }
 
 function preload(){
@@ -108,7 +140,7 @@ function setup(){
 
     createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
 
-    var horizon = CANVAS_HEIGHT / 3;
+    var horizon = CANVAS_HEIGHT / 3 + 30;
     var fogStart = horizon - 40;
 
     background(color(GROUND_COLOR));

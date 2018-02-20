@@ -151,17 +151,42 @@ function getPupilScale(eId) {
     }
 }
 
+function getPupilRotationPointX(pupilWidth, eId) {
+    switch(eId){
+        case 1:
+        case 3:
+        case 4:   return pupilWidth / 4;
+        default:  return pupilWidth / 2;
+    }
+}
+
+function getPupilRotationPointY(pupilHeight, eId) {
+    switch(eId){
+        case 0: return 1.5 * pupilHeight;
+        case 1:
+        case 3: return 1.25 * pupilHeight;
+        case 4: return 1.75 * pupilHeight;
+        default: return pupilHeight;
+    }
+}
+
 function createPupilInstance(eyeballInstance) {
     var pupil = random(pupils);
     var pupilYOffset = getPupilYOffset(eyeballInstance.height, eyeballInstance.id);
     var pupilXOffset = getPupilXOffset(eyeballInstance.width, eyeballInstance.id)
     var pupilScale = getPupilScale(eyeballInstance.id) * eyeballInstance.scale;
+    var pupilWidth = pupilScale * pupil.img.width;
+    var pupilHeight = pupilScale * pupil.img.height;
+    var pupilRotationtPointX = getPupilRotationPointX(pupilWidth, eyeballInstance.id);
+    var pupilRotationtPointY = getPupilRotationPointY(pupilHeight, eyeballInstance.id);
     return {
         'id': pupil.id,
         'x': eyeballInstance.x + pupilXOffset,
         'y': eyeballInstance.y + pupilYOffset,
-        'width': pupilScale * pupil.img.width,
-        'height': pupilScale * pupil.img.height
+        'width': pupilWidth,
+        'height': pupilHeight,
+        'rotationPointX': pupilRotationtPointX,
+        'rotationPointY': pupilRotationtPointY
     };
 }
 
@@ -171,8 +196,13 @@ function drawEyeball(eyeballInstance) {
 }
 
 function drawPupil(pupilInstance) {
-    var pupilImg = pupils[pupilInstance.id].img;
-    image(pupilImg, pupilInstance.x, pupilInstance.y, pupilInstance.width, pupilInstance.height);
+    push();
+    translate(pupilInstance.x + pupilInstance.rotationPointX, pupilInstance.y + pupilInstance.rotationPointY);
+    var angle = map(mouseX, 0, CANVAS_WIDTH, -2 * PI / 5, 2 * PI / 5);
+    rotate(angle);
+    var pupilImg = pupils[pupilInstance.id].img
+    image(pupilImg, -pupilInstance.rotationPointX, -pupilInstance.rotationPointY, pupilInstance.width, pupilInstance.height);
+    pop();
 }
 
 function drawEyeballs(){

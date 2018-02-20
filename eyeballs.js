@@ -25,6 +25,7 @@ var SETTINGS = {
     'scaleFactor':      1.6
 };
 
+var finger;
 var eyeballs = [];
 var eyeballPool = eyeballs;
 var pupils = [];
@@ -53,6 +54,11 @@ function loadPupils(){
             'img': loadImage(IMGPATH + 'pupil' + imgNums[i] + '.png')
         });
     }
+}
+
+function drawFinger(){
+    
+    image(finger, mouseX, 0, 0.5 * finger.width, 0.5 * finger.height);
 }
 
 function drawFog(heightStart, heightEnd, colorStart, colorEnd) {
@@ -229,6 +235,7 @@ function preload(){
     
     loadEyeballs();
     loadPupils();   
+    finger = loadImage('img/finger.png');
     ambientSound = loadSound('forest.mp3');
 
 }
@@ -255,4 +262,5 @@ function draw() {
 
     drawEyeballs();
 
+    drawFinger();
 }

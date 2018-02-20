@@ -7,6 +7,8 @@ var GROUND_COLOR = [253, 125, 152];
 var FOG_START_COLOR = [255, 255, 255, 200];
 var FOG_END_COLOR = [255, 255, 255, 0];
 
+var ambientSound;
+
 var horizon = CANVAS_HEIGHT / 3 + 30;
 var fogStart = horizon - 40;
 
@@ -227,15 +229,17 @@ function preload(){
     
     loadEyeballs();
     loadPupils();   
+    ambientSound = loadSound('forest.mp3');
 
 }
 
 
 function setup(){
 
+    ambientSound.loop();
     createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     createEyeballInstances();     
-    
+
 }
 
 function draw() {

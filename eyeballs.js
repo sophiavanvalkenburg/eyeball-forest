@@ -26,6 +26,8 @@ var SETTINGS = {
     'widthFactor':      1.6,
     'widthOffset':      5,
     'fingerAcc':        1.25,
+    'fingerOffset':     350,
+    'fingerScale':      0.35,
     'scaleValue':       0.025,
     'scaleFactor':      1.6
 };
@@ -62,10 +64,11 @@ function loadPupils(){
 }
 
 function drawFinger(){
+    var maxFingerY = min(fogStart, SETTINGS.fingerScale * finger.height - SETTINGS.fingerOffset);
     if (moveFinger === 'down') {
         fingerY *= SETTINGS.fingerAcc;
-        if (fingerY >= fogStart) {
-            fingerY = fogStart;
+        if (fingerY >= maxFingerY) {
+            fingerY = maxFingerY;
             moveFinger = 'up';
         }
     } else if (moveFinger == 'up') {
@@ -78,7 +81,7 @@ function drawFinger(){
         fingerY = 0;
         fingerX = mouseX;
     }
-    image(finger, fingerX, fingerY, 0.5 * finger.width, 0.5 * finger.height);
+    image(finger, fingerX, fingerY - SETTINGS.fingerOffset, SETTINGS.fingerScale * finger.width, SETTINGS.fingerScale * finger.height);
 }
 
 function drawFog(heightStart, heightEnd, colorStart, colorEnd) {
@@ -255,7 +258,7 @@ function preload(){
     
     loadEyeballs();
     loadPupils();   
-    finger = loadImage('img/finger.png');
+    finger = loadImage('img/finger2.png');
     ambientSound = loadSound('forest.mp3');
 
 }

@@ -9,6 +9,9 @@ var FOG_END_COLOR = [255, 255, 255, 0];
 
 var ambientSound;
 var started = false;
+var moveFinger = 'stop';
+var fingerY = 0;
+var fingerX = 0;
 
 var horizon = CANVAS_HEIGHT / 3 + 30;
 var fogStart = horizon - 40;
@@ -22,6 +25,7 @@ var SETTINGS = {
     'widthInterval':    20,
     'widthFactor':      1.6,
     'widthOffset':      5,
+    'fingerAcc':        1.25,
     'scaleValue':       0.025,
     'scaleFactor':      1.6
 };
@@ -58,8 +62,23 @@ function loadPupils(){
 }
 
 function drawFinger(){
-    
-    image(finger, mouseX, 0, 0.5 * finger.width, 0.5 * finger.height);
+    if (moveFinger === 'down') {
+        fingerY *= SETTINGS.fingerAcc;
+        if (fingerY >= fogStart) {
+            fingerY = fogStart;
+            moveFinger = 'up';
+        }
+    } else if (moveFinger == 'up') {
+        fingerY /= SETTINGS.fingerAcc;
+        if (fingerY <= 0.5) {
+            fingerY = 0;
+            moveFinger = 'stop';
+        }
+    } else {
+        fingerY = 0;
+        fingerX = mouseX;
+    }
+    image(finger, fingerX, fingerY, 0.5 * finger.width, 0.5 * finger.height);
 }
 
 function drawFog(heightStart, heightEnd, colorStart, colorEnd) {
@@ -272,11 +291,17 @@ function draw() {
         background(255);
         textSize(50);
         textAlign(CENTER, CENTER);
-        text('Press Anywhere To Enter The Forest', CANVAS_WIDTH/2, CANVAS_HEIGHT/2);
+        text('Press Anywhere To Enter The Forest...', CANVAS_WIDTH/2, CANVAS_HEIGHT/2);
     }
 }
 
-function mousePressed() {
-    userStartAudio();
-    started = true;
+function mouseClicked() {
+    if (started) {
+        moveFinger = 'down';
+        fingerY = 0.5;
+        fingerX = mouseX;
+    } else {
+        userStartAudio();
+        started = true;
+    }
 }

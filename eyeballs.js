@@ -8,6 +8,7 @@ var FOG_START_COLOR = [255, 255, 255, 200];
 var FOG_END_COLOR = [255, 255, 255, 0];
 
 var ambientSound;
+var bubblePopSound;
 var started = false;
 var moveFinger = 'stop';
 var fingerY = 0;
@@ -260,6 +261,7 @@ function preload(){
     loadPupils();   
     finger = loadImage('img/finger2.png');
     ambientSound = loadSound('forest.mp3');
+    bubblePopSound = loadSound('bubble-pop.mp3');
 
 }
 
@@ -303,6 +305,7 @@ function mouseClicked() {
         moveFinger = 'down';
         fingerY = 0.5;
         fingerX = mouseX;
+        bubblePopSound.play();
     } else {
         userStartAudio();
         started = true;

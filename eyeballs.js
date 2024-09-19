@@ -8,6 +8,7 @@ var FOG_START_COLOR = [255, 255, 255, 200];
 var FOG_END_COLOR = [255, 255, 255, 0];
 
 var ambientSound;
+var started = false;
 
 var horizon = CANVAS_HEIGHT / 3 + 30;
 var fogStart = horizon - 40;
@@ -243,24 +244,39 @@ function preload(){
 
 function setup(){
 
+    getAudioContext().suspend();
     ambientSound.loop();
     createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     createEyeballInstances();     
 
+    
+
 }
 
 function draw() {
-    clear();
-    background(color(GROUND_COLOR));
+    if (started) {
+        clear();
+        background(color(GROUND_COLOR));
+    
+        noStroke();
+        var topColor = color(FOG_START_COLOR);
+        topColor.setAlpha(255);
+        fill(topColor);
+        rect(0, 0, CANVAS_WIDTH, fogStart + 1);
+        noFill();
+    
+        drawEyeballs();
+    
+        drawFinger();
+    }  else {
+        background(255);
+        textSize(50);
+        textAlign(CENTER, CENTER);
+        text('Press Anywhere To Enter The Forest', CANVAS_WIDTH/2, CANVAS_HEIGHT/2);
+    }
+}
 
-    noStroke();
-    var topColor = color(FOG_START_COLOR);
-    topColor.setAlpha(255);
-    fill(topColor);
-    rect(0, 0, CANVAS_WIDTH, fogStart + 1);
-    noFill();
-
-    drawEyeballs();
-
-    drawFinger();
+function mousePressed() {
+    userStartAudio();
+    started = true;
 }

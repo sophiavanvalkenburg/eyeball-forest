@@ -73,10 +73,10 @@ function loadPupils(){
 
 function loadTears() {
     var imgNums = ["1", "2", "3"];
-    for (var i = 0; i < imgNums.length; i++){
+    for (var i = 0; i < 2 * imgNums.length; i++){
         tears.push({
             'id': i,
-            'img': loadImage(IMGPATH + 'tear' + imgNums[i] + '.png'),
+            'img': loadImage(IMGPATH + 'tear' + imgNums[int(i/2)] + '.png'),
             'scale': 1,
             'x': 0,
             'y': 0,
@@ -297,10 +297,10 @@ function drawTears() {
     if (moveFinger === 'up' && !showTears){
         showTears = true;
         var startY = getMaxFingerY() + 100;
-        var startX = fingerX + 25;
+        var startX = fingerX;
         for (var i=0; i<tears.length; i++) {
             var tearImg = tears[i].img
-            var scale = 0.1 + 0.25 * random();
+            var scale = 0.1 + 0.35 * random();
             var xDir = random() > 0.5 ? -1 : 1;
             tears[i].alpha = 255;
             tears[i].angle = xDir < 0 ? SETTINGS.tearAngle : -SETTINGS.tearAngle
@@ -308,7 +308,6 @@ function drawTears() {
             tears[i].scale = scale;
             tears[i].x = startX;
             tears[i].y = startY;
-            image(tearImg, startX, startY, scale * tearImg.width, scale * tearImg.height);
         }
     } else if (showTears) {
         var allTearsFell = true;

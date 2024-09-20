@@ -10,6 +10,7 @@ var FOG_END_COLOR = [255, 255, 255, 0];
 var ambientSound;
 var bubblePopSound;
 var started = false;
+var tearsStatus = 'off';
 var moveFinger = 'stop';
 var fingerY = 0;
 var fingerX = 0;
@@ -43,7 +44,6 @@ var eyeballs = [];
 var eyeballPool = eyeballs;
 var pupils = [];
 var tears = [];
-var showTears = false;
 
 var layers = []; // each element is object {height: float, eyeballInstances:[], pupilInstances: []}
 
@@ -294,8 +294,8 @@ function drawEyeballs(){
 }
 
 function drawTears() {
-    if (moveFinger === 'up' && !showTears){
-        showTears = true;
+    if (moveFinger === 'up' && tearsStatus === 'init'){
+        tearsStatus = 'on';
         var startY = getMaxFingerY() + 100;
         var startX = fingerX;
         for (var i=0; i<tears.length; i++) {
@@ -309,7 +309,7 @@ function drawTears() {
             tears[i].x = startX;
             tears[i].y = startY;
         }
-    } else if (showTears) {
+    } else if (tearsStatus === 'on') {
         var allTearsFell = true;
         for (var i=0; i<tears.length; i++) {
             var tearImg = tears[i].img
@@ -328,7 +328,7 @@ function drawTears() {
             allTearsFell = allTearsFell && tears[i].y >= CANVAS_HEIGHT;
         }
         if (allTearsFell) {
-            showTears = false;
+            tearsStatus = 'off';
         }
     }
 }
@@ -382,6 +382,7 @@ function draw() {
 function mouseClicked() {
     if (started) {
         moveFinger = 'down';
+        tearsStatus = 'init';
         fingerY = 0.5;
         fingerX = mouseX;
         bubblePopSound.play();

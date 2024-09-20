@@ -372,9 +372,11 @@ function draw() {
 
     }  else {
         background(255);
-        textSize(50);
         textAlign(CENTER, CENTER);
-        text('Press Anywhere To Enter The Forest...', CANVAS_WIDTH/2, CANVAS_HEIGHT/2);
+        textSize(48);
+        text('Press Anywhere To Enter The Forest...', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 - 50);
+        textSize(32);
+        text('controls: move & click mouse', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 + 50)
     }
 }
 

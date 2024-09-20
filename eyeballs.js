@@ -10,15 +10,18 @@ var FOG_END_COLOR = [255, 255, 255, 0];
 var ambientSound;
 var bubblePopSound;
 var started = false;
+var ended = false;
 var tearsStatus = 'off';
 var moveFinger = 'stop';
 var fingerY = 0;
 var fingerX = 0;
+var clickCount = 0;
 
 var horizon = CANVAS_HEIGHT / 3 + 30;
 var fogStart = horizon - 40;
 
 var SETTINGS = {
+    'clickIntervals':   16,
     'maxHeight':        CANVAS_HEIGHT,
     'maxWidth':         CANVAS_WIDTH,
     'heightInterval':   20,
@@ -354,7 +357,7 @@ function setup(){
 }
 
 function draw() {
-    if (started) {
+    if (started && !ended) {
         clear();
         background(color(GROUND_COLOR));
     
@@ -369,24 +372,47 @@ function draw() {
         drawTears();
         drawFinger();
 
-    }  else {
+        var overlayColor = color(GROUND_COLOR)
+        overlayColor.setAlpha(clickCount * SETTINGS.clickIntervals);
+        fill(overlayColor);
+        rect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+
+    }  else if (!started && !ended) {
         background(255);
         textAlign(CENTER, CENTER);
         textSize(48);
         text('Press Anywhere To Enter The Forest...', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 - 50);
         textSize(32);
         text('controls: move & click mouse', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 + 50)
+    } else if (ended) {
+        clear();
+        background(color(GROUND_COLOR));
+        fill(0);
+        textAlign(CENTER, CENTER);
+        textSize(48);
+        text('Thank You For Visiting!', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 - 50);
+        textSize(32);
+        text('refresh page to visit again', CANVAS_WIDTH/2, CANVAS_HEIGHT/2 + 50)
     }
 }
 
 function mouseClicked() {
-    if (started) {
+    if (started && !ended) {
+        clickCount++;
         moveFinger = 'down';
         tearsStatus = 'init';
         fingerY = 0.5;
         fingerX = mouseX;
         bubblePopSound.play();
-    } else {
+        var soundAmp = 1 - clickCount * (1/SETTINGS.clickIntervals);
+        if (soundAmp >= 0){
+            bubblePopSound.amp(soundAmp);
+            ambientSound.amp(soundAmp);
+        }
+        if (clickCount >= SETTINGS.clickIntervals) {
+            ended = true;
+        }
+    } else if (!started && !ended){
         userStartAudio();
         started = true;
     }

@@ -26,9 +26,14 @@ var SETTINGS = {
     'widthInterval':    20,
     'widthFactor':      1.6,
     'widthOffset':      5,
-    'fingerAcc':        1.25,
+    'fingerYAcc':       1.25,
+    'fingerXSpeed':     20,
     'fingerOffset':     350,
     'fingerScale':      0.35,
+    'tearYAcc':         1.02,
+    'tearAngleSpeed':   0.5,
+    'tearAngle':        22.5,
+    'tearAlphaSpeed':   0.95,
     'scaleValue':       0.025,
     'scaleFactor':      1.6
 };
@@ -37,6 +42,8 @@ var finger;
 var eyeballs = [];
 var eyeballPool = eyeballs;
 var pupils = [];
+var tears = [];
+var showTears = false;
 
 var layers = []; // each element is object {height: float, eyeballInstances:[], pupilInstances: []}
 
@@ -64,18 +71,49 @@ function loadPupils(){
     }
 }
 
+function loadTears() {
+    var imgNums = ["1", "2", "3"];
+    for (var i = 0; i < imgNums.length; i++){
+        tears.push({
+            'id': i,
+            'img': loadImage(IMGPATH + 'tear' + imgNums[i] + '.png'),
+            'scale': 1,
+            'x': 0,
+            'y': 0,
+            'xSpeed': 1,
+            'angle': 0,
+            'alpha': 255,
+        });
+    }
+}
+
+function getMaxFingerY() {
+    return min(fogStart, SETTINGS.fingerScale * finger.height - SETTINGS.fingerOffset);
+}
+
 function drawFinger(){
-    var maxFingerY = min(fogStart, SETTINGS.fingerScale * finger.height - SETTINGS.fingerOffset);
     if (moveFinger === 'down') {
-        fingerY *= SETTINGS.fingerAcc;
+        var maxFingerY = getMaxFingerY();
+        fingerY *= SETTINGS.fingerYAcc;
         if (fingerY >= maxFingerY) {
             fingerY = maxFingerY;
             moveFinger = 'up';
         }
-    } else if (moveFinger == 'up') {
-        fingerY /= SETTINGS.fingerAcc;
-        if (fingerY <= 0.5) {
+    } else if (moveFinger === 'up') {
+        var doneMovingX = abs(fingerX - mouseX) <= SETTINGS.fingerXSpeed;
+        var doneMovingY = fingerY <= 1;
+        if (doneMovingY) {
             fingerY = 0;
+        } else {
+            fingerY /= SETTINGS.fingerYAcc;
+        }
+        if (doneMovingX){
+            fingerX = mouseX;
+        } else {
+            var xDir = mouseX - fingerX < 0 ? -1 : 1;
+            fingerX += xDir * SETTINGS.fingerXSpeed;
+        }
+        if (doneMovingX && doneMovingY) {
             moveFinger = 'stop';
         }
     } else {
@@ -255,10 +293,52 @@ function drawEyeballs(){
         
 }
 
+function drawTears() {
+    if (moveFinger === 'up' && !showTears){
+        showTears = true;
+        var startY = getMaxFingerY() + 100;
+        var startX = fingerX + 25;
+        for (var i=0; i<tears.length; i++) {
+            var tearImg = tears[i].img
+            var scale = 0.1 + 0.25 * random();
+            var xDir = random() > 0.5 ? -1 : 1;
+            tears[i].alpha = 255;
+            tears[i].angle = xDir < 0 ? SETTINGS.tearAngle : -SETTINGS.tearAngle
+            tears[i].xSpeed = xDir * 3 * random();
+            tears[i].scale = scale;
+            tears[i].x = startX;
+            tears[i].y = startY;
+            image(tearImg, startX, startY, scale * tearImg.width, scale * tearImg.height);
+        }
+    } else if (showTears) {
+        var allTearsFell = true;
+        for (var i=0; i<tears.length; i++) {
+            var tearImg = tears[i].img
+            var imgHeight = tears[i].scale * tearImg.height;
+            var imgWidth = tears[i].scale * tearImg.width;
+            tears[i].x = tears[i].x + tears[i].xSpeed;
+            tears[i].y = tears[i].y * SETTINGS.tearYAcc;
+            tears[i].angle += tears[i].angle < 0 ? SETTINGS.tearAngleSpeed : -SETTINGS.tearAngleSpeed
+            tears[i].alpha *= SETTINGS.tearAlphaSpeed;
+            push();
+            translate(tears[i].x + imgWidth/2, tears[i].y + imgHeight/2);
+            rotate(PI/180 * tears[i].angle)
+            tint(255, tears[i].alpha)
+            image(tearImg, 0, 0, imgWidth, imgHeight);
+            pop();
+            allTearsFell = allTearsFell && tears[i].y >= CANVAS_HEIGHT;
+        }
+        if (allTearsFell) {
+            showTears = false;
+        }
+    }
+}
+
 function preload(){
     
     loadEyeballs();
-    loadPupils();   
+    loadPupils(); 
+    loadTears();  
     finger = loadImage('img/finger2.png');
     ambientSound = loadSound('forest.mp3');
     bubblePopSound = loadSound('bubble-pop.mp3');
@@ -267,13 +347,10 @@ function preload(){
 
 
 function setup(){
-
     getAudioContext().suspend();
     ambientSound.loop();
     createCanvas(CANVAS_WIDTH, CANVAS_HEIGHT);
     createEyeballInstances();     
-
-    
 
 }
 
@@ -290,8 +367,9 @@ function draw() {
         noFill();
     
         drawEyeballs();
-    
+        drawTears();
         drawFinger();
+
     }  else {
         background(255);
         textSize(50);
